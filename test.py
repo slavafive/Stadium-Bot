@@ -1,3 +1,5 @@
+import hashlib
+
 import psycopg2
 
 from dao.fan_id_card_dao import FanIDCardDAO
@@ -13,5 +15,11 @@ organizer = Organizer.construct("cristiano")
 cashier = Cashier.construct("slava")
 # match = Match(None, "Dortmund", "Sevilla", "2021-03-10", organizer.username, "quarterfinal")
 # organizer.add_match(match)
-new_customer = Customer("alexis", "alexis", "sanchez", 29, None)
-cashier.register(new_customer)
+# new_customer = Customer("alexis", "alexis", "sanchez", 29, None)
+# cashier.register(new_customer)
+
+def encrypt_password(password):
+    return hashlib.md5(password.encode()).hexdigest()
+
+
+print(encrypt_password("abcdefgh"))

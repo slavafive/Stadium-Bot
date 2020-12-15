@@ -34,3 +34,13 @@ class PersonDAO(DAO):
         if len(result) == 0:
             raise UsernameNotFoundError("Username was not found")
         return result[0]
+
+    @staticmethod
+    def does_exist(username):
+        result = DAO.select("SELECT * FROM person WHERE username = '{}'".format(username))
+        return len(result) > 0
+
+    @staticmethod
+    def get_role_by_username(username):
+        result = DAO.select("SELECT role FROM person WHERE username = '{}'".format(username))
+        return result[0][0]

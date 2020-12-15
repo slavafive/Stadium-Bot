@@ -63,3 +63,4 @@ class FanIDCard:
         new_card_id = int(FanIDCardDAO.get_max_card_id()) + 1
         card = FanIDCard(new_card_id, username, FanIDCard.get_expiration_date(), 0, False)
         FanIDCardDAO.save(card)
+        return card

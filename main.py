@@ -1,7 +1,121 @@
 import telebot
 
+from dao.person_dao import PersonDAO
+from domain.cashier import Cashier
+from domain.customer import Customer
+from domain.organizer import Organizer
+
 bot = telebot.TeleBot('1447437162:AAFlqQ_odEZvxv-qx0oJVemiFyfE3Xch0CA')
 
+
+class CurrentUser:
+    def __init__(self):
+        self.authenticated = False
+        self.username = ""
+        self.password = ""
+        self.operation = ""
+        self.role = None
+        self.person = None
+
+
+class NewCustomer:
+    def __init__(self):
+        self.username = self.age = self.first_name = self.last_name = None
+
+
+user = CurrentUser()
+new_customer = None
+
+
+def send(message, text, next_handler=None):
+    sent = bot.send_message(message.chat.id, text)
+    if next_handler is not None:
+        bot.register_next_step_handler(sent, next_handler)
+
+
+@bot.message_handler(commands=["start"])
+def show(message):
+    user_markup = telebot.types.ReplyKeyboardMarkup(True, False)
+    if not user.authenticated:
+        user_markup.row("Login")
+    elif user.role == "customer":
+        user_markup.row("Schedule")
+        user_markup.row("Show tickets")
+        user_markup.row("Add balance")
+        user_markup.row("Buy ticket", "Return ticket")
+    elif user.role == "cashier":
+        user_markup.row("Register new customer")
+        user_markup.row("Block Fan ID Card")
+        user_markup.row("Unblock Fan ID Card")
+    elif user.role == "organizer":
+        user_markup.row("Add match")
+    bot.send_message(message.chat.id, "Choose command", reply_markup=user_markup)
+
+
+@bot.message_handler(regexp="Login")
+def login(message):
+    if not user.authenticated:
+        send(message, "Enter your username", enter_username)
+
+
+def enter_username(message):
+    username = message.text
+    if PersonDAO.does_exist(username):
+        user.username = username
+        send(message, "Enter your password", enter_password)
+    else:
+        send(message, "The username does not exist")
+
+
+def enter_password(message):
+    password = message.text
+    if PersonDAO.is_password_correct(user.username, password):
+        user.password = password
+        user.authenticated = True
+        user.role = PersonDAO.get_role_by_username(user.username)
+        if user.role == "customer":
+            user.person = Customer.construct(user.username)
+        elif user.role == "cashier":
+            user.person = Cashier.construct(user.username)
+        elif user.role == "organizer":
+            user.person = Organizer.construct(user.username)
+        send(message, "You have been successfully logged in as {} {}".format(user.role, user.username), show)
+    else:
+        send(message, "The entered password is wrong. You can try to sign in again")
+
+
+@bot.message_handler(regexp="Register new customer")
+def register_new_customer(message):
+    if user.role == "cashier":
+        global new_customer
+        new_customer = NewCustomer()
+        send(message, "Enter username", enter_new_username)
+
+
+def enter_new_username(message):
+    new_customer.username = message.text
+    send(message, "Enter age", enter_age)
+
+
+def enter_age(message):
+    new_customer.age = int(message.text)
+    send(message, "Enter first name", enter_first_name)
+
+
+def enter_first_name(message):
+    new_customer.first_name = message.text
+    send(message, "Enter last name", enter_last_name)
+
+
+def enter_last_name(message):
+    new_customer.last_name = message.text
+    customer = Customer(new_customer.username, new_customer.first_name, new_customer.last_name, new_customer.age, None)
+    user.person.register(customer)
+    send(message, "The customer was successfully registered".format(customer.username))
+    send(message, "Username: {}\nPassword: {}".format(customer.username, customer.password))
+
+
+bot.polling()
 
 """
 
@@ -287,7 +401,6 @@ def return_ticket(message):
 # def inline(callback):
 #     print(callback.data)
 
-"""
-
-
 bot.polling()
+
+"""

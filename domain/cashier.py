@@ -18,10 +18,10 @@ class Cashier(Person):
 
     def register(self, person):
         PersonDAO.register(person, self.username)
-        self.create_fan_id(person.username)
+        person.fan_id_card = self.create_fan_id(person.username)
 
     def create_fan_id(self, username):
-        FanIDCard.create(username)
+        return FanIDCard.create(username)
 
     @staticmethod
     def block_fan_id_card(customer):
