@@ -3,6 +3,7 @@ import telebot
 from dao.person_dao import PersonDAO
 from domain.cashier import Cashier
 from domain.customer import Customer
+from domain.match import Match
 from domain.organizer import Organizer
 
 bot = telebot.TeleBot('1447437162:AAFlqQ_odEZvxv-qx0oJVemiFyfE3Xch0CA')
@@ -11,11 +12,7 @@ bot = telebot.TeleBot('1447437162:AAFlqQ_odEZvxv-qx0oJVemiFyfE3Xch0CA')
 class CurrentUser:
     def __init__(self):
         self.authenticated = False
-        self.username = ""
-        self.password = ""
-        self.operation = ""
-        self.role = None
-        self.person = None
+        self.username = self.password = self.operation = self.role = self.person = None
 
 
 class NewCustomer:
@@ -23,8 +20,14 @@ class NewCustomer:
         self.username = self.age = self.first_name = self.last_name = None
 
 
+class NewMatch:
+    def __init__(self):
+        self.host_team = self.guest_team = self.date = self.match_type = None
+
+
 user = CurrentUser()
 new_customer = None
+new_match = None
 
 
 def send(message, text, next_handler=None):
@@ -113,6 +116,43 @@ def enter_last_name(message):
     user.person.register(customer)
     send(message, "The customer was successfully registered".format(customer.username))
     send(message, "Username: {}\nPassword: {}".format(customer.username, customer.password))
+
+
+@bot.message_handler(regexp="Add match")
+def add_match(message):
+    if user.role == "organizer":
+        global new_match
+        new_match = NewMatch()
+        send(message, "Enter host team", enter_host_team)
+
+
+def enter_host_team(message):
+    new_match.host_team = message.text
+    send(message, "Enter guest team", enter_guest_team)
+
+
+def enter_guest_team(message):
+    new_match.guest_team = message.text
+    send(message, "Enter match date in format YYYY-MM-DD", enter_match_date)
+
+
+def enter_match_date(message):
+    new_match.date = message.text
+    user_markup = telebot.types.ReplyKeyboardMarkup(True, False)
+    user_markup.row("Group")
+    user_markup.row("Quarterfinal")
+    user_markup.row("Semifinal")
+    user_markup.row("Final")
+    sent = bot.send_message(message.chat.id, "Choose match type", reply_markup=user_markup)
+    bot.register_next_step_handler(sent, enter_match_type)
+
+
+def enter_match_type(message):
+    match_type = message.text
+    new_match.match_type = match_type
+    match = Match(None, new_match.host_team, new_match.guest_team, new_match.date, user.person.username, new_match.match_type)
+    user.person.add_match(match)
+    send(message, "The match {} between {} and {} was successfully added".format(match.id, match.host_team, match.guest_team))
 
 
 bot.polling()
