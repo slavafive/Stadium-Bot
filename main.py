@@ -1,5 +1,6 @@
 import telebot
 
+from dao.match_dao import MatchDAO
 from dao.person_dao import PersonDAO
 from domain.cashier import Cashier
 from domain.customer import Customer
@@ -28,6 +29,7 @@ class NewMatch:
 user = CurrentUser()
 new_customer = None
 new_match = None
+match = None
 
 
 def send(message, text, next_handler=None):
@@ -52,6 +54,9 @@ def show(message):
         user_markup.row("Unblock Fan ID Card")
     elif user.role == "organizer":
         user_markup.row("Add match")
+        user_markup.row("Update match")
+        user_markup.row("Delete match")
+        user_markup.row("Cancel match")
     bot.send_message(message.chat.id, "Choose command", reply_markup=user_markup)
 
 
@@ -117,6 +122,7 @@ def enter_last_name(message):
     send(message, "The customer was successfully registered".format(customer.username))
     send(message, "Username: {}\nPassword: {}".format(customer.username, customer.password))
 
+# organizer
 
 @bot.message_handler(regexp="Add match")
 def add_match(message):
@@ -153,6 +159,68 @@ def enter_match_type(message):
     match = Match(None, new_match.host_team, new_match.guest_team, new_match.date, user.person.username, new_match.match_type)
     user.person.add_match(match)
     send(message, "The match {} between {} and {} was successfully added".format(match.id, match.host_team, match.guest_team))
+
+
+@bot.message_handler(regexp='Update match')
+def update_match(message):
+    if user.role == "organizer":
+        send(message, "Enter match ID you would like to update", enter_match_id)
+
+
+def enter_match_id(message):
+    match_id = int(message.text)
+    global match
+    match = Match.construct(match_id)
+    user_markup = telebot.types.ReplyKeyboardMarkup(True, False)
+    user_markup.row("Host team", "Guest team")
+    user_markup.row("Match date", "Match type")
+    user_markup.row("OK")
+    sent = bot.send_message(message.chat.id, "Choose field you would like to update", reply_markup=user_markup)
+    bot.register_next_step_handler(sent, enter_field_to_udpate)
+
+
+def enter_field_to_udpate(message):
+    field = message.text
+    if field == "Host team":
+        send(message, "Enter new name of host team", enter_new_host_team)
+    elif field == "Guest team":
+        send(message, "Enter new name of guest team", enter_new_guest_team)
+    elif field == "Match date":
+        send(message, "Enter new match date in format YYYY-MM-DD", enter_new_match_date)
+    elif field == "Match type":
+        user_markup = telebot.types.ReplyKeyboardMarkup(True, False)
+        user_markup.row("Group")
+        user_markup.row("Quarterfinal")
+        user_markup.row("Semifinal")
+        user_markup.row("Final")
+        sent = bot.send_message(message.chat.id, "Choose match type", reply_markup=user_markup)
+        bot.register_next_step_handler(sent, enter_new_match_type)
+
+
+def enter_new_host_team(message):
+    match.host_team = message.text
+    user.person.update_match(match)
+    send(message, "Host team name was successfully updated")
+
+
+def enter_new_guest_team(message):
+    match.guest_team = message.text
+    user.person.update_match(match)
+    send(message, "Guest team name was successfully updated")
+
+
+def enter_new_match_date(message):
+    match.date = message.text
+    user.person.update_match(match)
+    send(message, "Match date was successfully updated")
+
+
+def enter_new_match_type(message):
+    match.match_type = message.text
+    user.person.update_match(match)
+    send(message, "Match type name was successfully updated")
+
+
 
 
 bot.polling()
