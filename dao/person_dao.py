@@ -13,6 +13,12 @@ class UsernameNotFoundError(Exception):
 class PersonDAO(DAO):
 
     @staticmethod
+    def register(person, creator="NULL"):
+        DAO.insert("INSERT INTO person (username, first_name, last_name, age, role, password, creator) VALUES ('{}', '{}', '{}', {}, '{}', '{}', '{}')"
+                   .format(person.username, person.first_name, person.last_name, person.age, person.role,
+                           PersonDAO.encrypt_password(person.password), creator))
+
+    @staticmethod
     def encrypt_password(password):
         return hashlib.md5(password.encode()).hexdigest()
 

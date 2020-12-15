@@ -4,7 +4,8 @@ CREATE TABLE person (
     first_name varchar(255),
     last_name varchar(255),
     role varchar(255),
-    age int
+    age int,
+    creator varchar(255)
 );
 
 CREATE TABLE cards (

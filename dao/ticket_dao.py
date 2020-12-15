@@ -15,6 +15,15 @@ class TicketDAO(DAO):
     def return_ticket(ticket_id):
         DAO.update("UDPATE tickets SET card_id = NULL WHERE id = {}".format(ticket_id))
 
+    @staticmethod
+    def delete_tickets_by_match_id(match_id):
+        DAO.delete("DELETE FROM tickets WHERE match_id = {}".format(match_id))
+
+    @staticmethod
+    def get_paid_money(match_id):
+        result = DAO.select("SELECT card_id, price FROM tickets WHERE match_id = {}".format(match_id))
+        return result
+
 """
     BLOCKS = 3
     ROWS = 3

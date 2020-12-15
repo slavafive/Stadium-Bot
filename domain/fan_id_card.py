@@ -39,6 +39,14 @@ class FanIDCard:
     def increase_balance(self, value):
         FanIDCardDAO.increase_balance(self.id, value)
 
+    def block(self):
+        self.is_blocked = True
+        FanIDCardDAO.save(self)
+
+    def ublock(self):
+        self.is_blocked = False
+        FanIDCardDAO.save(self)
+
     @staticmethod
     def construct(card_id):
         row = FanIDCardDAO.get_card_by_id(card_id)
