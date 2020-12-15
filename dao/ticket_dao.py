@@ -14,6 +14,10 @@ class TicketDAO(DAO):
         return DAO.select("SELECT * FROM tickets WHERE id = {}".format(ticket_id))[0]
 
     @staticmethod
+    def get_tickets_id_by_card_id(card_id):
+        return DAO.select("SELECT id FROM tickets WHERE card_id = {}".format(card_id))
+
+    @staticmethod
     def reserve_ticket(ticket_id, card_id):
         DAO.update("UDPATE tickets SET card_id = {} WHERE id = {}".format(card_id, ticket_id))
 

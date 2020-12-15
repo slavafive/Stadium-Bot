@@ -22,5 +22,4 @@ def encrypt_password(password):
     return hashlib.md5(password.encode()).hexdigest()
 
 
-print(encrypt_password("weston"))
-print(encrypt_password("alexis"))
+print(encrypt_password("mario"))

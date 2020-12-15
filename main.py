@@ -2,10 +2,12 @@ import telebot
 
 from dao.match_dao import MatchDAO
 from dao.person_dao import PersonDAO
+from dao.ticket_dao import TicketDAO
 from domain.cashier import Cashier
 from domain.customer import Customer
 from domain.match import Match
 from domain.organizer import Organizer
+from domain.ticket import SingleTicket
 
 bot = telebot.TeleBot('1447437162:AAFlqQ_odEZvxv-qx0oJVemiFyfE3Xch0CA')
 
@@ -53,10 +55,8 @@ def show(message):
             user_markup.row("Block Fan ID Card")
             user_markup.row("Unblock Fan ID Card")
         elif user.role == "organizer":
-            user_markup.row("Add match")
-            user_markup.row("Update match")
-            user_markup.row("Delete match")
-            user_markup.row("Cancel match")
+            user_markup.row("Add match", "Update match")
+            user_markup.row("Delete match", "Cancel match")
         user_markup.row("Logout")
     user_markup.row("Show matches")
     bot.send_message(message.chat.id, "Choose command", reply_markup=user_markup)
@@ -110,6 +110,17 @@ def enter_password(message):
         send(message, "The entered password is wrong. You can try to sign in again")
 
 # customer
+
+@bot.message_handler(regexp="Show tickets")
+def show_tickets(message):
+    card_id = user.person.fan_id_card
+    result = TicketDAO.get_tickets_id_by_card_id(card_id.id)
+    tickets = ""
+    for row in result:
+        ticket_id = row[0]
+        tickets += str(SingleTicket.construct(ticket_id)) + "\n--------------\n"
+    send(message, tickets if tickets != "" else "You do not have any tickets")
+
 
 @bot.message_handler(regexp="Add balance")
 def add_balance(message):
