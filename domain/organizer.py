@@ -34,7 +34,8 @@ class Organizer(Person):
     def cancel_match(match_id):
         paid_money = TicketDAO.get_paid_money(match_id)
         for card_id, price in paid_money:
-            FanIDCardDAO.increase_balance(card_id, price)
+            if card_id is not None:
+                FanIDCardDAO.increase_balance(card_id, price)
         TicketDAO.delete_tickets_by_match_id(match_id)
         MatchDAO.delete_match(match_id)
 

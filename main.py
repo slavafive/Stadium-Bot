@@ -164,17 +164,17 @@ def enter_match_type(message):
 @bot.message_handler(regexp='Update match')
 def update_match(message):
     if user.role == "organizer":
-        send(message, "Enter match ID you would like to update", enter_match_id)
+        send(message, "Enter match ID you would like to update", enter_match_id_to_update)
 
 
-def enter_match_id(message):
+def enter_match_id_to_update(message):
     match_id = int(message.text)
     global match
     match = Match.construct(match_id)
     user_markup = telebot.types.ReplyKeyboardMarkup(True, False)
     user_markup.row("Host team", "Guest team")
     user_markup.row("Match date", "Match type")
-    user_markup.row("OK")
+    user_markup.row("Cancel")
     sent = bot.send_message(message.chat.id, "Choose field you would like to update", reply_markup=user_markup)
     bot.register_next_step_handler(sent, enter_field_to_udpate)
 
@@ -220,6 +220,29 @@ def enter_new_match_type(message):
     user.person.update_match(match)
     send(message, "Match type name was successfully updated")
 
+
+@bot.message_handler(regexp='Delete match')
+def delete_match(message):
+    if user.role == "organizer":
+        send(message, "Enter match ID you would like to delete", enter_match_id_to_delete)
+
+
+def enter_match_id_to_delete(message):
+    match_id = int(message.text)
+    user.person.delete_match(match_id)
+    send(message, "The match {} was successfully deleted".format(match_id))
+
+
+@bot.message_handler(regexp='Cancel match')
+def cancel_match(message):
+    if user.role == "organizer":
+        send(message, "Enter match ID you would like to cancel", enter_match_id_to_cancel)
+
+
+def enter_match_id_to_cancel(message):
+    match_id = int(message.text)
+    user.person.cancel_match(match_id)
+    send(message, "The match {} was successfully cancelled".format(match_id))
 
 
 
