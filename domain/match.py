@@ -1,3 +1,6 @@
+from dao.match_dao import MatchDAO
+
+
 class Match:
     def __init__(self, id, host_team, guest_team, date, organizer, match_type):
         self.id = id
@@ -9,3 +12,8 @@ class Match:
 
     def __str__(self):
         return str(self.id) + ": " + self.host_team + " vs " + self.guest_team + "; Date: " + str(self.date) + " "
+
+    @staticmethod
+    def construct(match_id):
+        row = MatchDAO.get_match_by_id(match_id)
+        return Match(row[0], row[1], row[2], row[3], row[4], row[5])

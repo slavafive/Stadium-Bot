@@ -1,10 +1,21 @@
 from dao.dao import DAO
-from domain.seat import Seat
-from domain.ticket import SingleTicket
 
 
 class TicketDAO(DAO):
 
+    @staticmethod
+    def get_ticket_by_id(ticket_id):
+        return DAO.select("SELECT * FROM tickets WHERE id = {}".format(ticket_id))[0]
+
+    @staticmethod
+    def reserve_ticket(ticket_id, card_id):
+        DAO.update("UDPATE tickets SET card_id = {} WHERE id = {}".format(card_id, ticket_id))
+
+    @staticmethod
+    def return_ticket(ticket_id):
+        DAO.update("UDPATE tickets SET card_id = NULL WHERE id = {}".format(ticket_id))
+
+"""
     BLOCKS = 3
     ROWS = 3
     PLACES = 3
@@ -63,3 +74,9 @@ class TicketDAO(DAO):
     def does_ticket_id_exist(self, ticket_id):
         result = self.select("SELECT * FROM tickets WHERE id = '{}'".format(ticket_id))
         return len(result) != 0
+
+    @staticmethod
+    def reserve_ticket(ticket_id, card_id):
+        pass
+        
+"""

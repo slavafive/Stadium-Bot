@@ -2,31 +2,35 @@ import psycopg2
 
 
 class DAO:
-    def __init__(self):
-        self.con = psycopg2.connect(
+    con = psycopg2.connect(
             host="localhost",
             database="stadium",
             user="slava",
             password="123"
         )
-        self.cur = self.con.cursor()
+    cur = con.cursor()
 
-    def select(self, query):
-        self.cur.execute(query)
-        return self.cur.fetchall()
+    @staticmethod
+    def select(query):
+        DAO.cur.execute(query)
+        return DAO.cur.fetchall()
 
-    def modify(self, query):
-        self.cur.execute(query)
-        self.con.commit()
+    @staticmethod
+    def modify(query):
+        DAO.cur.execute(query)
+        DAO.con.commit()
 
-    def insert(self, query):
-        self.modify(query)
+    @staticmethod
+    def insert(query):
+        DAO.modify(query)
 
-    def update(self, query):
-        self.modify(query)
+    @staticmethod
+    def update(query):
+        DAO.modify(query)
 
-    def delete(self, query):
-        self.modify(query)
+    @staticmethod
+    def delete(query):
+        DAO.modify(query)
 
     def __del__(self):
         self.cur.close()

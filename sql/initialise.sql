@@ -20,5 +20,5 @@ INSERT INTO matches (host, guest, match_date, organizer, match_type) VALUES ('PS
 
 INSERT INTO tickets (match_id, card_id, block, row, place, price) VALUES (1, 3, 1, 1, 1, 35.99);
 INSERT INTO tickets (match_id, card_id, block, row, place, price) VALUES (1, 2, 1, 1, 2, 49.99);
-INSERT INTO tickets (match_id, card_id, block, row, place, price) VALUES (2, 6, 1, 1, 3, 38.99);
-INSERT INTO tickets (match_id, card_id, block, row, place, price) VALUES (2, 6, 1, 2, 1, 45.99);
+INSERT INTO tickets (match_id, card_id, block, row, place, price) VALUES (2, 1, 1, 1, 3, 38.99);
+INSERT INTO tickets (match_id, card_id, block, row, place, price) VALUES (2, 4, 1, 2, 1, 45.99);

@@ -1,5 +1,10 @@
 import telebot
 
+bot = telebot.TeleBot('1447437162:AAFlqQ_odEZvxv-qx0oJVemiFyfE3Xch0CA')
+
+
+"""
+
 from dao.match_dao import MatchDAO
 from dao.person_dao import PersonDAO, UserExistsError
 from dao.ticket_dao import TicketDAO
@@ -16,7 +21,6 @@ match_dao = MatchDAO()
 ticket_dao = TicketDAO()
 fan_id_card_dao = FanIDCardDAO()
 is_authorized = True
-
 
 @bot.message_handler(regexp='login')
 def login(message):
@@ -282,6 +286,8 @@ def return_ticket(message):
 # @bot.callback_query_handler(func=lambda c: True)
 # def inline(callback):
 #     print(callback.data)
+
+"""
 
 
 bot.polling()
