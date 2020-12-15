@@ -51,3 +51,8 @@ class FanIDCardDAO(DAO):
             FanIDCardDAO.update(card)
         else:
             FanIDCardDAO.insert(card)
+
+    @staticmethod
+    def get_max_card_id():
+        max_card_id = DAO.select("SELECT MAX(id) FROM cards")[0][0]
+        return max_card_id

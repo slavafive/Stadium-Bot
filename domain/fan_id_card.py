@@ -16,12 +16,13 @@ class FanIDCard:
         self.id = card_id
         self.username = username
         self.balance = balance
-        self.expiration_date = self.get_expiration_date() if expiration_date is None else expiration_date
+        self.expiration_date = FanIDCard.get_expiration_date() if expiration_date is None else expiration_date
         self.is_blocked = is_blocked
 
-    def get_expiration_date(self):
+    @staticmethod
+    def get_expiration_date():
         now = datetime.datetime.now()
-        year = str(now.year + self.EXPIRATION_PERIOD_IN_YEARS)
+        year = str(now.year + FanIDCard.EXPIRATION_PERIOD_IN_YEARS)
         month = str(now.month) if len(str(now.month)) == 2 else "0" + str(now.month)
         day = str(now.day) if len(str(now.day)) == 2 else "0" + str(now.day)
         return year + "-" + month + "-" + day
@@ -56,3 +57,9 @@ class FanIDCard:
     def construct_by_username(username):
         row = FanIDCardDAO.get_card_by_username(username)
         return FanIDCard(*row)
+
+    @staticmethod
+    def create(username):
+        new_card_id = int(FanIDCardDAO.get_max_card_id()) + 1
+        card = FanIDCard(new_card_id, username, FanIDCard.get_expiration_date(), 0, False)
+        FanIDCardDAO.save(card)
