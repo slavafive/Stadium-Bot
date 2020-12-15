@@ -23,8 +23,11 @@ class SingleTicket(Ticket):
     @staticmethod
     def construct(ticket_id):
         row = TicketDAO.get_ticket_by_id(ticket_id)
-        card_id = int(row[1])
-        fan_id_card = FanIDCard.construct(card_id)
+        if row[1] is None:
+            fan_id_card = None
+        else:
+            card_id = int(row[1])
+            fan_id_card = FanIDCard.construct(card_id)
         match_id = int(row[3])
         match = Match.construct(match_id)
         seat = Seat(row[4], row[5], row[6])

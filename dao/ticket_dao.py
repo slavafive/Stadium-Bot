@@ -18,12 +18,16 @@ class TicketDAO(DAO):
         return DAO.select("SELECT id FROM tickets WHERE card_id = {}".format(card_id))
 
     @staticmethod
+    def get_available_tickets_id_and_seats_and_price(match_id):
+        return DAO.select("SELECT id, block, row, place, price FROM tickets WHERE match_id = {} AND card_id is NULL".format(match_id))
+
+    @staticmethod
     def reserve_ticket(ticket_id, card_id):
-        DAO.update("UDPATE tickets SET card_id = {} WHERE id = {}".format(card_id, ticket_id))
+        DAO.update("UPDATE tickets SET card_id = {} WHERE id = {}".format(card_id, ticket_id))
 
     @staticmethod
     def return_ticket(ticket_id):
-        DAO.update("UDPATE tickets SET card_id = NULL WHERE id = {}".format(ticket_id))
+        DAO.update("UPDATE tickets SET card_id = NULL WHERE id = {}".format(ticket_id))
 
     @staticmethod
     def delete_tickets_by_match_id(match_id):

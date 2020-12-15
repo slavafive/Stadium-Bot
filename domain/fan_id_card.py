@@ -32,6 +32,7 @@ class FanIDCard:
             raise NotEnoughMoneyError("Not enough money to pay for the ticket")
         TicketDAO.reserve_ticket(ticket.id, self.id)
         FanIDCardDAO.reduce_balance(self.id, ticket.price)
+        self.balance -= ticket.price
 
     def return_ticket(self, ticket):
         TicketDAO.return_ticket(ticket.id)
