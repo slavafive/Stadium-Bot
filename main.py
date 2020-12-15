@@ -38,26 +38,44 @@ def send(message, text, next_handler=None):
         bot.register_next_step_handler(sent, next_handler)
 
 
-@bot.message_handler(commands=["start"])
+@bot.message_handler(commands=["start"], regexp="start")
 def show(message):
     user_markup = telebot.types.ReplyKeyboardMarkup(True, False)
     if not user.authenticated:
         user_markup.row("Login")
-    elif user.role == "customer":
-        user_markup.row("Schedule")
-        user_markup.row("Show tickets")
-        user_markup.row("Add balance")
-        user_markup.row("Buy ticket", "Return ticket")
-    elif user.role == "cashier":
-        user_markup.row("Register new customer")
-        user_markup.row("Block Fan ID Card")
-        user_markup.row("Unblock Fan ID Card")
-    elif user.role == "organizer":
-        user_markup.row("Add match")
-        user_markup.row("Update match")
-        user_markup.row("Delete match")
-        user_markup.row("Cancel match")
+    else:
+        if user.role == "customer":
+            user_markup.row("Show tickets")
+            user_markup.row("Add balance")
+            user_markup.row("Buy ticket", "Return ticket")
+        elif user.role == "cashier":
+            user_markup.row("Register new customer")
+            user_markup.row("Block Fan ID Card")
+            user_markup.row("Unblock Fan ID Card")
+        elif user.role == "organizer":
+            user_markup.row("Add match")
+            user_markup.row("Update match")
+            user_markup.row("Delete match")
+            user_markup.row("Cancel match")
+        user_markup.row("Logout")
+    user_markup.row("Show matches")
     bot.send_message(message.chat.id, "Choose command", reply_markup=user_markup)
+
+
+@bot.message_handler(regexp="Show matches")
+def show_matches(message):
+    result = MatchDAO.get_matches()
+    matches = ""
+    for row in result:
+        matches += str(Match(*row)) + "\n"
+    send(message, matches)
+
+
+@bot.message_handler(regexp="Logout")
+def logout(message):
+    user.authenticated = False
+    user.role = ""
+    send(message, "You have been logged out")
 
 
 @bot.message_handler(regexp="Login")
@@ -87,10 +105,24 @@ def enter_password(message):
             user.person = Cashier.construct(user.username)
         elif user.role == "organizer":
             user.person = Organizer.construct(user.username)
-        send(message, "You have been successfully logged in as {} {}".format(user.role, user.username), show)
+        send(message, "You have been successfully logged in as {} {} {}".format(user.role, user.person.first_name, user.person.last_name), show)
     else:
         send(message, "The entered password is wrong. You can try to sign in again")
 
+# customer
+
+@bot.message_handler(regexp="Add balance")
+def add_balance(message):
+    if user.role == "customer":
+        send(message, "Your current balance: ${}\nEnter the value you would like to increase your balance".format(user.person.fan_id_card.balance), enter_value)
+
+
+def enter_value(message):
+    value = round(float(message.text), 2)
+    user.person.increase_balance(value)
+    send(message, "Your balance was increased and now equals ${}".format(user.person.fan_id_card.balance))
+
+# cashier
 
 @bot.message_handler(regexp="Register new customer")
 def register_new_customer(message):
@@ -243,7 +275,6 @@ def enter_match_id_to_cancel(message):
     match_id = int(message.text)
     user.person.cancel_match(match_id)
     send(message, "The match {} was successfully cancelled".format(match_id))
-
 
 
 bot.polling()

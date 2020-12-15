@@ -28,3 +28,7 @@ class MatchDAO(DAO):
     def get_max_match_id():
         max_match_id = DAO.select("SELECT MAX(id) FROM matches")[0][0]
         return max_match_id
+
+    @staticmethod
+    def get_matches():
+        return DAO.select("SELECT * FROM matches ORDER BY id")

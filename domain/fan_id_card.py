@@ -39,6 +39,7 @@ class FanIDCard:
 
     def increase_balance(self, value):
         FanIDCardDAO.increase_balance(self.id, value)
+        self.balance += value
 
     def block(self):
         self.is_blocked = True
