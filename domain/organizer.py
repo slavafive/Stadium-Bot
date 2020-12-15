@@ -3,6 +3,8 @@ from dao.match_dao import MatchDAO
 from dao.person_dao import PersonDAO
 from dao.ticket_dao import TicketDAO
 from domain.person import Person
+from domain.seat import Seat
+from domain.ticket import SingleTicket
 
 
 class Organizer(Person):
@@ -12,7 +14,13 @@ class Organizer(Person):
 
     @staticmethod
     def add_match(match):
-        MatchDAO.add_match(match)
+        new_match_id = MatchDAO.add_match(match)
+        match.id = new_match_id
+        seats = Seat.get_seats()
+        for seat in seats:
+            price = 20 * seat.block + 5 * seat.row + 3 * seat.place + 0.99
+            ticket = SingleTicket(None, None, price, match, seat)
+            TicketDAO.add_ticket(ticket)
 
     @staticmethod
     def update_match(match):

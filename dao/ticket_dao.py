@@ -4,6 +4,12 @@ from dao.dao import DAO
 class TicketDAO(DAO):
 
     @staticmethod
+    def add_ticket(ticket):
+        seat = ticket.seat
+        DAO.insert("INSERT INTO tickets (price, match_id, block, row, place) VALUES ({}, {}, {}, {}, {})"
+                   .format(ticket.price, ticket.match.id, seat.block, seat.row, seat.place))
+
+    @staticmethod
     def get_ticket_by_id(ticket_id):
         return DAO.select("SELECT * FROM tickets WHERE id = {}".format(ticket_id))[0]
 

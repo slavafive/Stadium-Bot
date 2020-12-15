@@ -1,9 +1,22 @@
 class Seat:
-    def __init__(self, block, row, place, price=0):
+
+    BLOCKS = 5
+    ROWS = 2
+    PLACES = 3
+
+    def __init__(self, block, row, place):
         self.block = block
         self.row = row
         self.place = place
-        self.price = 20 * block + 3 * row + 0.99 if price == 0 else price
 
     def __str__(self):
-        return "Block: {}, Row: {}, Place: {}, Price: {} $".format(self.block, self.row, self.place, self.price)
+        return "Block: {}, Row: {}, Place: {}".format(self.block, self.row, self.place)
+
+    @staticmethod
+    def get_seats():
+        seats = []
+        for block in range(1, Seat.BLOCKS + 1):
+            for row in range(1, Seat.ROWS + 1):
+                for place in range(1, Seat.PLACES + 1):
+                    seats.append(Seat(block, row, place))
+        return seats
