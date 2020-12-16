@@ -22,14 +22,14 @@ class Cashier(Person):
     def __init__(self, username, first_name, last_name, age):
         super().__init__(username, first_name, last_name, age, role="cashier")
 
-    def register(self, person):
-        if len(person.username) > self.MAX_LENGTH or len(person.first_name) > self.MAX_LENGTH or len(person.last_name) > self.MAX_LENGTH or person.age > 99:
+    def register(self, customer):
+        if len(customer.username) > self.MAX_LENGTH or len(customer.first_name) > self.MAX_LENGTH or len(customer.last_name) > self.MAX_LENGTH or customer.age > 99:
             raise IncorrectInputFormat("The input does not correspond to system format. "
                                        "The age must be in range from 12 to 99 and other fields must not exceed the length of {} symbols".format(self.MAX_LENGTH))
-        if PersonDAO.does_exist(person.username):
+        if PersonDAO.does_exist(customer.username):
             raise UserAlreadyExistsError("User already exists in the system")
-        PersonDAO.register(person, self.username)
-        person.fan_id_card = self.create_fan_id(person.username)
+        PersonDAO.register(customer, self.username)
+        customer.fan_id_card = self.create_fan_id(customer.username)
 
     def create_fan_id(self, username):
         return FanIDCard.create(username)
@@ -44,5 +44,5 @@ class Cashier(Person):
 
     @staticmethod
     def construct(username):
-        row = PersonDAO.get_person_by_username(username)
+        row = PersonDAO.get_by_id(username)
         return Cashier(row[0], row[2], row[3], row[5])

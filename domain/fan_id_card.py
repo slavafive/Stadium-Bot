@@ -53,11 +53,11 @@ class FanIDCard:
 
     def __str__(self):
         return "ID: {}\nBalance: ${}\nExpiration date: {}\nState: {}".format(
-            self.id, self.balance,self.expiration_date, "blocked 🔴" if self.is_blocked else "normal 🟢")
+            self.id, round(self.balance, 2), self.expiration_date, "blocked 🔴" if self.is_blocked else "normal 🟢")
 
     @staticmethod
     def construct(card_id):
-        row = FanIDCardDAO.get_card_by_id(card_id)
+        row = FanIDCardDAO.get_by_id(card_id)
         return FanIDCard(*row)
 
     @staticmethod

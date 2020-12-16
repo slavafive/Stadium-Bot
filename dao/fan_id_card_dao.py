@@ -9,7 +9,7 @@ class FanIDCardNotFoundError(Exception):
 class FanIDCardDAO(DAO):
 
     @staticmethod
-    def get_card_by_id(card_id):
+    def get_by_id(card_id):
         result = DAO.select("SELECT * FROM cards WHERE id = {}".format(card_id))
         if len(result) == 0:
             raise FanIDCardNotFoundError("Fan ID Card {} does not exist".format(card_id))

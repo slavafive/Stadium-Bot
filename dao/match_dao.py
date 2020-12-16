@@ -21,7 +21,7 @@ class MatchDAO(DAO):
         DAO.delete("DELETE FROM matches WHERE id = {}".format(match_id))
 
     @staticmethod
-    def get_match_by_id(match_id):
+    def get_by_id(match_id):
         return DAO.select("SELECT * FROM matches WHERE id = {}".format(match_id))[0]
 
     @staticmethod

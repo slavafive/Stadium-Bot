@@ -1,4 +1,5 @@
 import psycopg2
+import abc
 
 
 class DAO:
@@ -31,6 +32,17 @@ class DAO:
     @staticmethod
     def delete(query):
         DAO.modify(query)
+
+    @staticmethod
+    @abc.abstractmethod
+    def does_exist(id):
+        raise NotImplementedError("The method was not implemented")
+
+    @staticmethod
+    @abc.abstractmethod
+    def get_by_id(id):
+        raise NotImplementedError("The method was not implemented")
+
 
     def __del__(self):
         self.cur.close()

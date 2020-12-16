@@ -28,7 +28,7 @@ class SingleTicket(Ticket):
     def construct(ticket_id):
         if not TicketDAO.does_exist(ticket_id):
             raise TicketDoesNotExistError()
-        row = TicketDAO.get_ticket_by_id(ticket_id)
+        row = TicketDAO.get_by_id(ticket_id)
         if row[1] is None:
             fan_id_card = None
         else:

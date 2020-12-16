@@ -29,7 +29,7 @@ class PersonDAO(DAO):
         return len(result) != 0
 
     @staticmethod
-    def get_person_by_username(username):
+    def get_by_id(username):
         result = DAO.select("SELECT * FROM person WHERE username = '{}'".format(username))
         if len(result) == 0:
             raise UsernameNotFoundError("Username was not found")

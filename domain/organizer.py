@@ -42,5 +42,5 @@ class Organizer(Person):
 
     @staticmethod
     def construct(username):
-        row = PersonDAO.get_person_by_username(username)
+        row = PersonDAO.get_by_id(username)
         return Organizer(row[0], row[2], row[3], row[5])
