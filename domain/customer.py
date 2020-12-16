@@ -7,6 +7,10 @@ class TicketDoesNotBelongToCustomerError(Exception):
     pass
 
 
+class CustomerDoesNotExistError(Exception):
+    pass
+
+
 class Customer(Person):
 
     def __init__(self, username, first_name, last_name, age, fan_id_card):
@@ -29,6 +33,8 @@ class Customer(Person):
 
     @staticmethod
     def construct(username):
+        if not PersonDAO.does_exist(username) or PersonDAO.get_role_by_username(username) != "customer":
+            raise CustomerDoesNotExistError()
         row = PersonDAO.get_person_by_username(username)
         card = FanIDCard.construct_by_username(username)
         return Customer(row[0], row[2], row[3], row[5], card)

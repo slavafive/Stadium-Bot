@@ -4,7 +4,7 @@ from dao.match_dao import MatchDAO
 from dao.person_dao import PersonDAO
 from dao.ticket_dao import TicketDAO
 from domain.cashier import Cashier, UserAlreadyExistsError, IncorrectInputFormat
-from domain.customer import Customer, TicketDoesNotBelongToCustomerError
+from domain.customer import Customer, TicketDoesNotBelongToCustomerError, CustomerDoesNotExistError
 from domain.fan_id_card import NotEnoughMoneyError
 from domain.match import Match
 from domain.organizer import Organizer
@@ -275,9 +275,12 @@ def block_fan_id_card(message):
 
 def enter_username_to_unblock(message):
     username = message.text
-    customer = Customer.construct(username)
-    user.person.unblock_fan_id_card(customer)
-    send(message, "The Fan ID Card {} was successfully unblocked".format(customer.fan_id_card.id))
+    try:
+        customer = Customer.construct(username)
+        user.person.unblock_fan_id_card(customer)
+        send(message, "The Fan ID Card {} was successfully unblocked".format(customer.fan_id_card.id))
+    except CustomerDoesNotExistError:
+        send(message, "Customer with username \"{}\" does not exist. Please enter the username again".format(username), enter_username_to_unblock)
 
 
 @bot.message_handler(regexp="Block Fan ID Card")
@@ -288,9 +291,12 @@ def block_fan_id_card(message):
 
 def enter_username_to_block(message):
     username = message.text
-    customer = Customer.construct(username)
-    user.person.block_fan_id_card(customer)
-    send(message, "The Fan ID Card {} was successfully blocked".format(customer.fan_id_card.id))
+    try:
+        customer = Customer.construct(username)
+        user.person.block_fan_id_card(customer)
+        send(message, "The Fan ID Card {} was successfully blocked".format(customer.fan_id_card.id))
+    except CustomerDoesNotExistError:
+        send(message, "Customer with username \"{}\" does not exist. Please enter the username again".format(username), enter_username_to_block)
 
 
 # organizer
