@@ -1,4 +1,5 @@
 import telebot
+import datetime
 
 from dao.match_dao import MatchDAO
 from dao.person_dao import PersonDAO
@@ -319,8 +320,19 @@ def enter_guest_team(message):
     send(message, "Enter match date in format YYYY-MM-DD", enter_match_date)
 
 
+def is_valid_date(datestring):
+    try:
+        datetime.datetime.strptime(datestring, '%Y-%m-%d')
+        return True
+    except ValueError:
+        return False
+
+
 def enter_match_date(message):
     new_match.date = message.text
+    if not is_valid_date(new_match.date):
+        send(message, "The entered date is not in the format YYYY-MM-DD. Please enter the match date again in the correct format", enter_match_date)
+        return
     user_markup = telebot.types.ReplyKeyboardMarkup(True, False)
     user_markup.row("Group")
     user_markup.row("Quarterfinal")
@@ -332,6 +344,9 @@ def enter_match_date(message):
 
 def enter_match_type(message):
     match_type = message.text
+    if not (match_type == "Group" or match_type == "Quarterfinal" or match_type == "Semifinal" or match_type == "Final"):
+        send(message, "\"{}\" does not exist as a match type. Please enter the match type again".format(match_type), enter_match_type)
+        return
     new_match.match_type = match_type
     match = Match(None, new_match.host_team, new_match.guest_team, new_match.date, user.person.username, new_match.match_type)
     user.person.add_match(match)
