@@ -4,12 +4,12 @@ from dao.match_dao import MatchDAO
 from dao.person_dao import PersonDAO
 from dao.ticket_dao import TicketDAO
 from domain.cashier import Cashier, UserAlreadyExistsError, IncorrectInputFormat
-from domain.customer import Customer
+from domain.customer import Customer, TicketDoesNotBelongToCustomerError
 from domain.fan_id_card import NotEnoughMoneyError
 from domain.match import Match
 from domain.organizer import Organizer
 from domain.seat import Seat
-from domain.ticket import SingleTicket, Ticket
+from domain.ticket import SingleTicket, Ticket, TicketDoesNotExistError
 
 bot = telebot.TeleBot('1447437162:AAFlqQ_odEZvxv-qx0oJVemiFyfE3Xch0CA')
 
@@ -70,7 +70,7 @@ def show_matches(message):
     matches = ""
     for row in result:
         matches += str(Match(*row)) + "\n"
-    send(message, matches)
+    send(message, matches if matches != "" else "There are no available matches")
 
 
 @bot.message_handler(regexp="My credentials")
@@ -204,10 +204,18 @@ def return_ticket(message):
 
 
 def enter_ticket_id_to_return(message):
-    ticket_id = int(message.text)
-    ticket = SingleTicket.construct(ticket_id)
-    user.person.return_ticket(ticket)
-    send(message, "Ticket {} was successfully returned. Balance: ${}".format(ticket_id, user.person.fan_id_card.balance))
+    try:
+        ticket_id = int(message.text)
+        ticket = SingleTicket.construct(ticket_id)
+        user.person.return_ticket(ticket)
+        send(message, "Ticket {} was successfully returned. Balance: ${}".format(ticket_id, user.person.fan_id_card.balance))
+    except ValueError:
+        send(message, "Ticket ID must be an integer. Please enter the ticket ID again", enter_ticket_id_to_return)
+    except TicketDoesNotExistError:
+        send(message, "The entered ticket ID does not exist. Please enter the ticket ID again", enter_ticket_id_to_return)
+    except TicketDoesNotBelongToCustomerError:
+        send(message, "Entered ticket ID does not belong to you. Please enter another ticket ID", enter_ticket_id_to_return)
+
 
 
 # cashier

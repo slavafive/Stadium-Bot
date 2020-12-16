@@ -4,6 +4,10 @@ from domain.match import Match
 from domain.seat import Seat
 
 
+class TicketDoesNotExistError(Exception):
+    pass
+
+
 class Ticket:
     def __init__(self, ticket_id, fan_id_card, price):
         self.id = ticket_id
@@ -22,6 +26,8 @@ class SingleTicket(Ticket):
 
     @staticmethod
     def construct(ticket_id):
+        if not TicketDAO.does_exist(ticket_id):
+            raise TicketDoesNotExistError()
         row = TicketDAO.get_ticket_by_id(ticket_id)
         if row[1] is None:
             fan_id_card = None

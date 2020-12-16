@@ -3,6 +3,10 @@ from domain.fan_id_card import FanIDCard
 from domain.person import Person
 
 
+class TicketDoesNotBelongToCustomerError(Exception):
+    pass
+
+
 class Customer(Person):
 
     def __init__(self, username, first_name, last_name, age, fan_id_card):
@@ -13,6 +17,8 @@ class Customer(Person):
         self.fan_id_card.reserve_ticket(ticket)
 
     def return_ticket(self, ticket):
+        if ticket.fan_id_card is None or self.fan_id_card.id != ticket.fan_id_card.id:
+            raise TicketDoesNotBelongToCustomerError()
         self.fan_id_card.return_ticket(ticket)
 
     def increase_balance(self, value):
