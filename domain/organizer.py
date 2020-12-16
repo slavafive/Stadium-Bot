@@ -28,6 +28,7 @@ class Organizer(Person):
 
     @staticmethod
     def delete_match(match_id):
+        TicketDAO.delete_tickets_by_match_id(match_id)
         MatchDAO.delete_match(match_id)
 
     @staticmethod

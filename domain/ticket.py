@@ -22,7 +22,7 @@ class SingleTicket(Ticket):
         self.seat = seat
 
     def __str__(self):
-        return "ID: {}\nMatch Information. {}\n".format(self.id, self.match) + "Seat: " + str(self.seat)
+        return "Ticket ID: {}\n{}\n".format(self.id, self.match) + "Seat: " + str(self.seat)
 
     @staticmethod
     def construct(ticket_id):

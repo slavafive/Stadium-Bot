@@ -15,7 +15,7 @@ class Match:
         self.match_type = match_type
 
     def __str__(self):
-        return str(self.id) + ": " + self.host_team + " vs " + self.guest_team + "; Date: " + str(self.date) + " "
+        return "----- Match {} -----\n{} vs {}\n{} Stage\nDate: {}".format(self.id, self.host_team, self.guest_team, self.match_type, self.date)
 
     @staticmethod
     def construct(match_id):

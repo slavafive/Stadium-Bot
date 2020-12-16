@@ -70,7 +70,7 @@ def show_matches(message):
     result = MatchDAO.get_matches()
     matches = ""
     for row in result:
-        matches += str(Match(*row)) + "\n"
+        matches += str(Match(*row)) + "\n\n"
     send(message, matches if matches != "" else "There are no available matches")
 
 
@@ -127,7 +127,7 @@ def show_tickets(message):
         tickets = ""
         for row in result:
             ticket_id = row[0]
-            tickets += str(SingleTicket.construct(ticket_id)) + "\n--------------\n"
+            tickets += str(SingleTicket.construct(ticket_id)) + "\n\n"
         send(message, tickets if tickets != "" else "You do not have any tickets")
 
 
@@ -433,9 +433,16 @@ def delete_match(message):
 
 
 def enter_match_id_to_delete(message):
-    match_id = int(message.text)
-    user.person.delete_match(match_id)
-    send(message, "The match {} was successfully deleted".format(match_id))
+    try:
+        match_id = int(message.text)
+        if not MatchDAO.does_exist(match_id):
+            raise MatchDoesNotExistError()
+        user.person.delete_match(match_id)
+        send(message, "The match {} was successfully deleted".format(match_id))
+    except ValueError:
+        send(message, "Match ID must be an integer. Please enter the match ID again", enter_match_id_to_delete)
+    except MatchDoesNotExistError:
+        send(message, "The entered match ID does not exist. Please enter the match ID again", enter_match_id_to_delete)
 
 
 @bot.message_handler(regexp='Cancel match')
@@ -445,9 +452,16 @@ def cancel_match(message):
 
 
 def enter_match_id_to_cancel(message):
-    match_id = int(message.text)
-    user.person.cancel_match(match_id)
-    send(message, "The match {} was successfully cancelled".format(match_id))
+    try:
+        match_id = int(message.text)
+        if not MatchDAO.does_exist(match_id):
+            raise MatchDoesNotExistError()
+        user.person.cancel_match(match_id)
+        send(message, "The match {} was successfully cancelled".format(match_id))
+    except ValueError:
+        send(message, "Match ID must be an integer. Please enter the match ID again", enter_match_id_to_cancel)
+    except MatchDoesNotExistError:
+        send(message, "The entered match ID does not exist. Please enter the match ID again", enter_match_id_to_cancel)
 
 
 bot.polling()
