@@ -11,6 +11,11 @@ class Person:
         self.role = role
         self.password = Person.generate_password()
 
+    def __str__(self):
+        return "Username: {}\nFirst name: {}\nLast name: {}\nAge: {}\nRole: {}".format(
+            self.username, self.first_name, self.last_name, self.age, self.role
+        )
+
     @staticmethod
     def generate_password():
         length = 8

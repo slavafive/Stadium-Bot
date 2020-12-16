@@ -36,6 +36,7 @@ class FanIDCard:
 
     def return_ticket(self, ticket):
         TicketDAO.return_ticket(ticket.id)
+        FanIDCardDAO.increase_balance(self.id, ticket.price)
         self.balance += ticket.price
 
     def increase_balance(self, value):
@@ -46,7 +47,7 @@ class FanIDCard:
         self.is_blocked = True
         FanIDCardDAO.save(self)
 
-    def ublock(self):
+    def unblock(self):
         self.is_blocked = False
         FanIDCardDAO.save(self)
 

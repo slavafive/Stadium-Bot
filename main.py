@@ -54,11 +54,11 @@ def show(message):
             user_markup.row("Buy ticket", "Return ticket")
         elif user.role == "cashier":
             user_markup.row("Register new customer")
-            user_markup.row("Block Fan ID Card")
-            user_markup.row("Unblock Fan ID Card")
+            user_markup.row("Block Fan ID Card", "Unblock Fan ID Card")
         elif user.role == "organizer":
             user_markup.row("Add match", "Update match")
             user_markup.row("Delete match", "Cancel match")
+        user_markup.row("My credentials")
         user_markup.row("Logout")
     user_markup.row("Show matches")
     bot.send_message(message.chat.id, "Choose command", reply_markup=user_markup)
@@ -71,6 +71,11 @@ def show_matches(message):
     for row in result:
         matches += str(Match(*row)) + "\n"
     send(message, matches)
+
+
+@bot.message_handler(regexp="My credentials")
+def show_credentials(message):
+    send(message, str(user.person))
 
 
 @bot.message_handler(regexp="Logout")
@@ -115,19 +120,23 @@ def enter_password(message):
 
 @bot.message_handler(regexp="Show tickets")
 def show_tickets(message):
-    card_id = user.person.fan_id_card
-    result = TicketDAO.get_tickets_id_by_card_id(card_id.id)
-    tickets = ""
-    for row in result:
-        ticket_id = row[0]
-        tickets += str(SingleTicket.construct(ticket_id)) + "\n--------------\n"
-    send(message, tickets if tickets != "" else "You do not have any tickets")
+    if user.role == "customer":
+        card_id = user.person.fan_id_card
+        result = TicketDAO.get_tickets_id_by_card_id(card_id.id)
+        tickets = ""
+        for row in result:
+            ticket_id = row[0]
+            tickets += str(SingleTicket.construct(ticket_id)) + "\n--------------\n"
+        send(message, tickets if tickets != "" else "You do not have any tickets")
 
 
 @bot.message_handler(regexp="Add balance")
 def add_balance(message):
     if user.role == "customer":
-        send(message, "Your current balance: ${}\nEnter the value you would like to increase your balance".format(user.person.fan_id_card.balance), enter_value)
+        if user.person.is_blocked():
+            send(message, "Your Fan ID Card is blocked")
+        else:
+            send(message, "Your current balance: ${}\nEnter the value you would like to increase your balance".format(user.person.fan_id_card.balance), enter_value)
 
 
 def enter_value(message):
@@ -139,7 +148,10 @@ def enter_value(message):
 @bot.message_handler(regexp="Buy ticket")
 def buy_ticket(message):
     if user.role == "customer":
-        send(message, "Enter match ID you would like to attend", enter_match_id_to_buy_ticket)
+        if user.person.is_blocked():
+            send(message, "Your Fan ID Card is blocked")
+        else:
+            send(message, "Enter match ID you would like to attend", enter_match_id_to_buy_ticket)
 
 
 def enter_match_id_to_buy_ticket(message):
@@ -169,6 +181,22 @@ def get_available_seats(match_id):
     for row in result:
         tickets_id_and_seats_and_prices += str(row[0]) + ": " + str(Seat(row[1], row[2], row[3])) + ". Price: ${}\n".format(row[4])
     return tickets_id_and_seats_and_prices
+
+
+@bot.message_handler(regexp="Return ticket")
+def return_ticket(message):
+    if user.role == "customer":
+        if user.person.is_blocked():
+            send(message, "Your Fan ID Card is blocked")
+        else:
+            send(message, "Enter ticket ID you would like to return", enter_ticket_id_to_return)
+
+
+def enter_ticket_id_to_return(message):
+    ticket_id = int(message.text)
+    ticket = SingleTicket.construct(ticket_id)
+    user.person.return_ticket(ticket)
+    send(message, "Ticket {} was successfully returned. Balance: ${}".format(ticket_id, user.person.fan_id_card.balance))
 
 
 # cashier
@@ -202,6 +230,33 @@ def enter_last_name(message):
     user.person.register(customer)
     send(message, "The customer was successfully registered".format(customer.username))
     send(message, "Username: {}\nPassword: {}".format(customer.username, customer.password))
+
+
+@bot.message_handler(regexp="Unblock Fan ID Card")
+def block_fan_id_card(message):
+    if user.role == "cashier":
+        send(message, "Enter Fan ID Card holder's username you would like to unblock", enter_username_to_unblock)
+
+
+def enter_username_to_unblock(message):
+    username = message.text
+    customer = Customer.construct(username)
+    user.person.unblock_fan_id_card(customer)
+    send(message, "The Fan ID Card {} was successfully unblocked".format(customer.fan_id_card.id))
+
+
+@bot.message_handler(regexp="Block Fan ID Card")
+def block_fan_id_card(message):
+    if user.role == "cashier":
+        send(message, "Enter Fan ID Card holder's username you would like to block", enter_username_to_block)
+
+
+def enter_username_to_block(message):
+    username = message.text
+    customer = Customer.construct(username)
+    user.person.block_fan_id_card(customer)
+    send(message, "The Fan ID Card {} was successfully blocked".format(customer.fan_id_card.id))
+
 
 # organizer
 

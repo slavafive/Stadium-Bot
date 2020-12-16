@@ -18,6 +18,9 @@ class Customer(Person):
     def increase_balance(self, value):
         self.fan_id_card.increase_balance(value)
 
+    def is_blocked(self):
+        return self.fan_id_card.is_blocked
+
     @staticmethod
     def construct(username):
         row = PersonDAO.get_person_by_username(username)
