@@ -32,3 +32,8 @@ class MatchDAO(DAO):
     @staticmethod
     def get_matches():
         return DAO.select("SELECT * FROM matches ORDER BY id")
+
+    @staticmethod
+    def does_exist(match_id):
+        result = DAO.select("SELECT * FROM matches WHERE id = {}".format(match_id))
+        return len(result) > 0

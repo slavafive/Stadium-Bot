@@ -156,21 +156,32 @@ def buy_ticket(message):
 
 def enter_match_id_to_buy_ticket(message):
     global match_id
-    match_id = int(message.text)
-    available_seats = get_available_seats(match_id)
-    if available_seats == "":
-        send(message, "There are no available seats for this match. Please choose another match", enter_match_id_to_buy_ticket)
-        return
-    send(message, "Choose an available seat for this match. Your balance: ${}".format(user.person.fan_id_card.balance))
-    send(message, available_seats, choose_seat)
+    try:
+        match_id = int(message.text)
+        if not MatchDAO.does_exist(match_id):
+            send(message, "The entered match id does not exist. Please enter the match id again", enter_match_id_to_buy_ticket)
+            return
+        available_seats = get_available_seats(match_id)
+        if available_seats == "":
+            send(message, "There are no available seats for this match. Please choose another match", enter_match_id_to_buy_ticket)
+            return
+        send(message, "Choose an available seat for this match. Your balance: ${}".format(user.person.fan_id_card.balance))
+        send(message, available_seats, choose_seat)
+    except ValueError:
+        send(message, "Match ID must be an integer. Please enter the match id again", enter_match_id_to_buy_ticket)
 
 
 def choose_seat(message):
-    ticket_id = int(message.text)
-    ticket = SingleTicket.construct(ticket_id)
     try:
+        ticket_id = int(message.text)
+        if not TicketDAO.does_exist(ticket_id):
+            send(message, "The entered ID does not exist. Please enter the ID again", choose_seat)
+            return
+        ticket = SingleTicket.construct(ticket_id)
         user.person.buy_ticket(ticket)
         send(message, "The seat and ticket were successfully reserved. Balance: ${}".format(user.person.fan_id_card.balance))
+    except ValueError:
+        send(message, "You should enter an ID for choosing a seat. Please enter the ID again", choose_seat)
     except NotEnoughMoneyError as error:
         send(message, str(error) + ". Please enter another seat", choose_seat)
 

@@ -37,3 +37,8 @@ class TicketDAO(DAO):
     def get_paid_money(match_id):
         result = DAO.select("SELECT card_id, price FROM tickets WHERE match_id = {}".format(match_id))
         return result
+
+    @staticmethod
+    def does_exist(ticket_id):
+        result = DAO.select("SELECT * FROM tickets WHERE id = {}".format(ticket_id))
+        return len(result) > 0
