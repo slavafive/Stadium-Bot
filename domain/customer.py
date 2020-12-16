@@ -31,6 +31,12 @@ class Customer(Person):
     def is_blocked(self):
         return self.fan_id_card.is_blocked
 
+    def __str__(self):
+        result = super(Customer, self).__str__()
+        result += "\n----- Fan ID card -----\n"
+        result += str(self.fan_id_card)
+        return result
+
     @staticmethod
     def construct(username):
         if not PersonDAO.does_exist(username) or PersonDAO.get_role_by_username(username) != "customer":
