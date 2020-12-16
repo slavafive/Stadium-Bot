@@ -7,7 +7,7 @@ from dao.ticket_dao import TicketDAO
 from domain.cashier import Cashier, UserAlreadyExistsError, IncorrectInputFormat
 from domain.customer import Customer, TicketDoesNotBelongToCustomerError, CustomerDoesNotExistError
 from domain.fan_id_card import NotEnoughMoneyError
-from domain.match import Match
+from domain.match import Match, MatchDoesNotExistError
 from domain.organizer import Organizer
 from domain.seat import Seat
 from domain.ticket import SingleTicket, Ticket, TicketDoesNotExistError
@@ -360,15 +360,20 @@ def update_match(message):
 
 
 def enter_match_id_to_update(message):
-    match_id = int(message.text)
-    global match
-    match = Match.construct(match_id)
-    user_markup = telebot.types.ReplyKeyboardMarkup(True, False)
-    user_markup.row("Host team", "Guest team")
-    user_markup.row("Match date", "Match type")
-    user_markup.row("Cancel")
-    sent = bot.send_message(message.chat.id, "Choose field you would like to update", reply_markup=user_markup)
-    bot.register_next_step_handler(sent, enter_field_to_udpate)
+    try:
+        match_id = int(message.text)
+        global match
+        match = Match.construct(match_id)
+        user_markup = telebot.types.ReplyKeyboardMarkup(True, False)
+        user_markup.row("Host team", "Guest team")
+        user_markup.row("Match date", "Match type")
+        user_markup.row("Cancel")
+        sent = bot.send_message(message.chat.id, "Choose field you would like to update", reply_markup=user_markup)
+        bot.register_next_step_handler(sent, enter_field_to_udpate)
+    except ValueError:
+        send(message, "Match ID must be an integer. Please enter the match ID again", enter_match_id_to_update)
+    except MatchDoesNotExistError:
+        send(message, "The entered match ID does not exist. Please enter the match ID again", enter_match_id_to_update)
 
 
 def enter_field_to_udpate(message):
@@ -387,6 +392,8 @@ def enter_field_to_udpate(message):
         user_markup.row("Final")
         sent = bot.send_message(message.chat.id, "Choose match type", reply_markup=user_markup)
         bot.register_next_step_handler(sent, enter_new_match_type)
+    else:
+        send(message, "The chosen field does not exist. Please enter the field again", enter_field_to_udpate)
 
 
 def enter_new_host_team(message):
@@ -403,12 +410,18 @@ def enter_new_guest_team(message):
 
 def enter_new_match_date(message):
     match.date = message.text
+    if not is_valid_date(match.date):
+        send(message, "The entered date is not in the format YYYY-MM-DD. Please enter the match date again in the correct format", enter_new_match_date)
+        return
     user.person.update_match(match)
     send(message, "Match date was successfully updated")
 
 
 def enter_new_match_type(message):
     match.match_type = message.text
+    if not (match.match_type == "Group" or match.match_type == "Quarterfinal" or match.match_type == "Semifinal" or match.match_type == "Final"):
+        send(message, "\"{}\" does not exist as a match type. Please enter the match type again".format(match.match_type), enter_new_match_type)
+        return
     user.person.update_match(match)
     send(message, "Match type name was successfully updated")
 

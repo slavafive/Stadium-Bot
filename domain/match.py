@@ -1,6 +1,10 @@
 from dao.match_dao import MatchDAO
 
 
+class MatchDoesNotExistError(Exception):
+    pass
+
+
 class Match:
     def __init__(self, id, host_team, guest_team, date, organizer, match_type):
         self.id = id
@@ -15,6 +19,8 @@ class Match:
 
     @staticmethod
     def construct(match_id):
+        if not MatchDAO.does_exist(match_id):
+            raise MatchDoesNotExistError()
         row = MatchDAO.get_match_by_id(match_id)
         return Match(row[0], row[1], row[2], row[3], row[4], row[5])
 
