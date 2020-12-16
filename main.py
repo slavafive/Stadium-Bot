@@ -98,7 +98,7 @@ def enter_username(message):
         user.username = username
         send(message, "Enter your password", enter_password)
     else:
-        send(message, "The username does not exist")
+        send(message, "The entered nusername does not exist. Enter the username again", enter_username)
 
 
 def enter_password(message):
@@ -113,9 +113,9 @@ def enter_password(message):
             user.person = Cashier.construct(user.username)
         elif user.role == "organizer":
             user.person = Organizer.construct(user.username)
-        send(message, "You have been successfully logged in as {} {} {}".format(user.role, user.person.first_name, user.person.last_name), show)
+        send(message, "🟢 You have been successfully logged in as {} {} {} 🟢".format(user.role, user.person.first_name, user.person.last_name), show)
     else:
-        send(message, "The entered password is wrong. You can try to sign in again")
+        send(message, "The entered password is wrong. Enter correct username and password again", enter_username)
 
 # customer
 

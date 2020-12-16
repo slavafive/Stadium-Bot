@@ -53,7 +53,7 @@ class FanIDCard:
 
     def __str__(self):
         return "ID: {}\nBalance: ${}\nExpiration date: {}\nState: {}".format(
-            self.id, self.balance,self.expiration_date, "blocked" if self.is_blocked else "normal")
+            self.id, self.balance,self.expiration_date, "blocked 🔴" if self.is_blocked else "normal 🟢")
 
     @staticmethod
     def construct(card_id):
