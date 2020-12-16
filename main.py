@@ -3,7 +3,7 @@ import telebot
 from dao.match_dao import MatchDAO
 from dao.person_dao import PersonDAO
 from dao.ticket_dao import TicketDAO
-from domain.cashier import Cashier
+from domain.cashier import Cashier, UserAlreadyExistsError, IncorrectInputFormat
 from domain.customer import Customer
 from domain.fan_id_card import NotEnoughMoneyError
 from domain.match import Match
@@ -215,8 +215,14 @@ def enter_new_username(message):
 
 
 def enter_age(message):
-    new_customer.age = int(message.text)
-    send(message, "Enter first name", enter_first_name)
+    try:
+        new_customer.age = int(message.text)
+        if new_customer.age < 12:
+            send(message, "The minimum age must be at least 12")
+        else:
+            send(message, "Enter first name", enter_first_name)
+    except ValueError:
+        send(message, "Age must be an integer. Please enter the age again in the correct format", enter_age)
 
 
 def enter_first_name(message):
@@ -227,9 +233,14 @@ def enter_first_name(message):
 def enter_last_name(message):
     new_customer.last_name = message.text
     customer = Customer(new_customer.username, new_customer.first_name, new_customer.last_name, new_customer.age, None)
-    user.person.register(customer)
-    send(message, "The customer was successfully registered".format(customer.username))
-    send(message, "Username: {}\nPassword: {}".format(customer.username, customer.password))
+    try:
+        user.person.register(customer)
+        send(message, "The customer was successfully registered".format(customer.username))
+        send(message, "Username: {}\nPassword: {}".format(customer.username, customer.password))
+    except IncorrectInputFormat as error:
+        send(message, error)
+    except UserAlreadyExistsError as error:
+        send(message, error)
 
 
 @bot.message_handler(regexp="Unblock Fan ID Card")
