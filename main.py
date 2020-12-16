@@ -140,9 +140,15 @@ def add_balance(message):
 
 
 def enter_value(message):
-    value = round(float(message.text), 2)
-    user.person.increase_balance(value)
-    send(message, "Your balance was increased and now equals ${}".format(user.person.fan_id_card.balance))
+    try:
+        value = round(float(message.text), 2)
+        if value <= 0:
+            send(message, "The value in $ can only be positive. Please enter the value again", enter_value)
+            return
+        user.person.increase_balance(value)
+        send(message, "Your balance was increased and now equals ${}".format(user.person.fan_id_card.balance))
+    except ValueError:
+        send(message, "Wrong input format. You should enter the value in $. Please enter the value again", enter_value)
 
 
 @bot.message_handler(regexp="Buy ticket")
@@ -215,7 +221,6 @@ def enter_ticket_id_to_return(message):
         send(message, "The entered ticket ID does not exist. Please enter the ticket ID again", enter_ticket_id_to_return)
     except TicketDoesNotBelongToCustomerError:
         send(message, "Entered ticket ID does not belong to you. Please enter another ticket ID", enter_ticket_id_to_return)
-
 
 
 # cashier
