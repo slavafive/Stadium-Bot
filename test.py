@@ -19,14 +19,8 @@ cashier = Cashier.construct("slava")
 # new_customer = Customer("alexis", "alexis", "sanchez", 29, None)
 # cashier.register(new_customer)
 
-# def encrypt_password(password):
-#     return hashlib.md5(password.encode()).hexdigest()
-#
-#
-# print(encrypt_password("mario"))
+def encrypt_password(password):
+    return hashlib.md5(password.encode()).hexdigest()
 
-date="13-11-2017"
 
-x=re.search("^([1-9] |1[0-9]| 2[0-9]|3[0-1])(.|-)([1-9] |1[0-2])(.|-|)20[0-9][0-9]$",date)
-
-x.group()
+print(encrypt_password("james"))

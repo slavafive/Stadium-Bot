@@ -67,11 +67,16 @@ def show(message):
 
 @bot.message_handler(regexp="Show matches")
 def show_matches(message):
+    matches = get_matches()
+    send(message, matches if matches != "" else "There are no available matches")
+
+
+def get_matches():
     result = MatchDAO.get_matches()
     matches = ""
     for row in result:
         matches += str(Match(*row)) + "\n\n"
-    send(message, matches if matches != "" else "There are no available matches")
+    return matches
 
 
 @bot.message_handler(regexp="My credentials")
@@ -137,7 +142,7 @@ def add_balance(message):
         if user.person.is_blocked():
             send(message, "Your Fan ID Card is blocked")
         else:
-            send(message, "Your current balance: ${}\nEnter the value you would like to increase your balance".format(user.person.fan_id_card.balance), enter_value)
+            send(message, "Your current balance: ${}\nEnter the value you would like to increase your balance".format(round(user.person.fan_id_card.balance, 2)), enter_value)
 
 
 def enter_value(message):
@@ -147,7 +152,7 @@ def enter_value(message):
             send(message, "The value in $ can only be positive. Please enter the value again", enter_value)
             return
         user.person.increase_balance(value)
-        send(message, "Your balance was increased and now equals ${}".format(user.person.fan_id_card.balance))
+        send(message, "Your balance was increased and now equals ${}".format(round(user.person.fan_id_card.balance, 2)))
     except ValueError:
         send(message, "Wrong input format. You should enter the value in $. Please enter the value again", enter_value)
 
@@ -158,7 +163,12 @@ def buy_ticket(message):
         if user.person.is_blocked():
             send(message, "Your Fan ID Card is blocked")
         else:
-            send(message, "Enter match ID you would like to attend", enter_match_id_to_buy_ticket)
+            matches = get_matches()
+            if matches == "":
+                send(message, "There are no available matches")
+            else:
+                send(message, "Enter match ID you would like to attend")
+                send(message, matches, enter_match_id_to_buy_ticket)
 
 
 def enter_match_id_to_buy_ticket(message):
@@ -172,7 +182,7 @@ def enter_match_id_to_buy_ticket(message):
         if available_seats == "":
             send(message, "There are no available seats for this match. Please choose another match", enter_match_id_to_buy_ticket)
             return
-        send(message, "Choose an available seat for this match. Your balance: ${}".format(user.person.fan_id_card.balance))
+        send(message, "Choose an available seat for this match. Your balance: ${}".format(round(user.person.fan_id_card.balance, 2)))
         send(message, available_seats, choose_seat)
     except ValueError:
         send(message, "Match ID must be an integer. Please enter the match id again", enter_match_id_to_buy_ticket)
@@ -186,7 +196,7 @@ def choose_seat(message):
             return
         ticket = SingleTicket.construct(ticket_id)
         user.person.buy_ticket(ticket)
-        send(message, "The seat and ticket were successfully reserved. Balance: ${}".format(user.person.fan_id_card.balance))
+        send(message, "The seat and ticket were successfully reserved. Balance: ${}".format(round(user.person.fan_id_card.balance, 2)))
     except ValueError:
         send(message, "You should enter an ID for choosing a seat. Please enter the ID again", choose_seat)
     except NotEnoughMoneyError as error:
@@ -215,7 +225,7 @@ def enter_ticket_id_to_return(message):
         ticket_id = int(message.text)
         ticket = SingleTicket.construct(ticket_id)
         user.person.return_ticket(ticket)
-        send(message, "Ticket {} was successfully returned. Balance: ${}".format(ticket_id, user.person.fan_id_card.balance))
+        send(message, "Ticket {} was successfully returned. Balance: ${}".format(ticket_id, round(user.person.fan_id_card.balance, 2)))
     except ValueError:
         send(message, "Ticket ID must be an integer. Please enter the ticket ID again", enter_ticket_id_to_return)
     except TicketDoesNotExistError:

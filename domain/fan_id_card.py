@@ -36,8 +36,13 @@ class FanIDCard:
 
     def return_ticket(self, ticket):
         TicketDAO.return_ticket(ticket.id)
-        FanIDCardDAO.increase_balance(self.id, ticket.price)
-        self.balance += ticket.price
+        refund_price = FanIDCard.calculate_refund_price(ticket.price)
+        FanIDCardDAO.increase_balance(self.id, refund_price)
+        self.balance += refund_price
+
+    @staticmethod
+    def calculate_refund_price(price):
+        return 0.9 * price
 
     def increase_balance(self, value):
         FanIDCardDAO.increase_balance(self.id, value)
