@@ -127,13 +127,18 @@ def enter_password(message):
 @bot.message_handler(regexp="Show tickets")
 def show_tickets(message):
     if user.role == "customer":
-        card_id = user.person.fan_id_card
-        result = TicketDAO.get_tickets_id_by_card_id(card_id.id)
-        tickets = ""
-        for row in result:
-            ticket_id = row[0]
-            tickets += str(SingleTicket.construct(ticket_id)) + "\n\n"
+        tickets = get_tickets()
         send(message, tickets if tickets != "" else "You do not have any tickets")
+
+
+def get_tickets():
+    card_id = user.person.fan_id_card
+    result = TicketDAO.get_tickets_id_by_card_id(card_id.id)
+    tickets = ""
+    for row in result:
+        ticket_id = row[0]
+        tickets += str(SingleTicket.construct(ticket_id)) + "\n\n"
+    return tickets
 
 
 @bot.message_handler(regexp="Add balance")
@@ -217,7 +222,12 @@ def return_ticket(message):
         if user.person.is_blocked():
             send(message, "Your Fan ID Card is blocked")
         else:
-            send(message, "Enter ticket ID you would like to return", enter_ticket_id_to_return)
+            tickets = get_tickets()
+            if tickets == "":
+                send(message, "You do not have any tickets")
+            else:
+                send(message, "Enter ticket ID you would like to return")
+                send(message, tickets, enter_ticket_id_to_return)
 
 
 def enter_ticket_id_to_return(message):
